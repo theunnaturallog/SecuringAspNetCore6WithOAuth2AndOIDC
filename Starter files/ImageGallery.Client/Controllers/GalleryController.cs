@@ -1,4 +1,5 @@
-﻿using ImageGallery.Client.ViewModels;
+﻿using IdentityModel.Client;
+using ImageGallery.Client.ViewModels;
 using ImageGallery.Model;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +29,10 @@ namespace ImageGallery.Client.Controllers
             await LogIdentityInformation();
 
             var httpClient = _httpClientFactory.CreateClient("APIClient");
-
+            httpClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+            {
+                Resource = ["haha"]
+            });
             var request = new HttpRequestMessage(
                 HttpMethod.Get,
                 "/api/images/");
@@ -189,6 +193,7 @@ namespace ImageGallery.Client.Controllers
         {
             // get the saved identity token
             var identityToken = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
+            var accessToken = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.AccessToken);
 
             var userClaimsStringBuilder = new StringBuilder();
             foreach (var claim in User.Claims)
@@ -199,6 +204,7 @@ namespace ImageGallery.Client.Controllers
             //log token & claims
             _logger.LogInformation($"Identity token & user claims:" +
                 $"\n{identityToken} \n{userClaimsStringBuilder}");
+            _logger.LogInformation($"Access token: " + $"\n{accessToken}");
         }
     }
 }
